@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  idUser         String       @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  nikname        String?
+  email          String
+  password       String
+  role           Role         @default(player)
+  isInTournament Boolean?     @default(false)
+  dateBirth      String
+  created_at     DateTime?    @default(now())
+  updated_at     DateTime?    @default(now())
+  Matchs         Matchs?
+  Ranking        Ranking?
+  Tournaments    Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
+  tournamentsId  String?      @unique @db.ObjectId
+  Loby           Loby?        @relation(fields: [lobyIdLoby], references: [idLoby])
+  lobyIdLoby     String?      @unique @db.ObjectId
+
+  @@map("user")
+}
+
+model Tournaments {
+  idTournament String    @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  date         String
+  locale       String
+  type         String
+  ranking      Ranking[]
+  players      Users[]
+  matches      Matchs[]
+  created_at   DateTime? @default(now())
+  updated_at   DateTime? @default(now())
+  playersId    String?   @unique @db.ObjectId
+  usersId      String?   @unique @db.ObjectId
+
+  @@map("tournament")
+}
+
+model Matchs {
+  idMatch       String       @id @default(auto()) @map("_id") @db.ObjectId
+  player        Json
+  oponent       Json
+  date          String
+  winnerScore   Int?
+  loserScore    Int?
+  winner        Users?       @relation(fields: [userId], references: [idUser])
+  created_at    DateTime?    @default(now())
+  updated_at    DateTime?    @default(now())
+  Tournaments   Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
+  tournamentsId String?      @unique @db.ObjectId
+  userId        String?      @unique @db.ObjectId
+
+  @@map("match")
+}
+
+model Ranking {
+  idRanking     String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          Users?       @relation(fields: [userId], references: [idUser])
+  victories     Int?
+  defeats       Int?
+  draws         Int?
+  Tournaments   Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
+  created_at    DateTime?    @default(now())
+  updated_at    DateTime?    @default(now())
+  tournamentsId String?      @unique @db.ObjectId
+  userId        String?      @unique @db.ObjectId
+
+  @@map("ranking")
+}
+
+model Loby {
+  idLoby     String    @id @default(auto()) @map("_id") @db.ObjectId
+  players    Users[]
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+}
+
+enum Role {
+  player
+  shopkeeper
+}

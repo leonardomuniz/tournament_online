@@ -1,0 +1,20 @@
+{
+  "name": "tournament_online",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "start": "tsx watch src/server.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.2"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@prisma/client": "^5.10.2",
+    "@types/node": "^20.11.26",
+    "fastify": "^4.26.2",
+    "prisma": "^5.10.2",
+    "tsx": "^4.7.1"
+  }
+}
