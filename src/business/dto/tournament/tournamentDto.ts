@@ -26,3 +26,8 @@ interface Matches {
   loserScore?: number
   winner?: string
 }
+
+export interface lobyDto {
+  players: UserDto
+  tournamentsId: string
+}

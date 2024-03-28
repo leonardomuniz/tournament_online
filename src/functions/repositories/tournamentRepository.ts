@@ -1,5 +1,4 @@
 import { TournamentDto } from '../../business/dto/tournament/tournamentDto'
-import { UserDto } from '../../business/dto/users/userDto'
 import prismaClient from '../prisma'
 
 export class TournamentRepository {

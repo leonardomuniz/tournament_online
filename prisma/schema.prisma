@@ -47,6 +47,7 @@ model Tournaments {
   updated_at   DateTime? @default(now())
   playersId    String?   @unique @db.ObjectId
   usersId      String?   @unique @db.ObjectId
+  Loby         Loby?
 
   @@map("tournament")
 }
@@ -84,10 +85,12 @@ model Ranking {
 }
 
 model Loby {
-  idLoby     String    @id @default(auto()) @map("_id") @db.ObjectId
-  players    Users[]
-  created_at DateTime? @default(now())
-  updated_at DateTime? @default(now())
+  idLoby        String      @id @default(auto()) @map("_id") @db.ObjectId
+  players       Users[]
+  tournament    Tournaments @relation(fields: [tournamentsId], references: [idTournament])
+  created_at    DateTime?   @default(now())
+  updated_at    DateTime?   @default(now())
+  tournamentsId String      @unique @db.ObjectId
 }
 
 enum Role {
