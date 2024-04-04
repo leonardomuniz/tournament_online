@@ -4,7 +4,7 @@ import prismaClient from '../prisma'
 export class LobyRepository {
   async create(input: lobyDto) {
     const { tournamentsId } = input
-    return prismaClient.loby
+    return prismaClient.lobby
       .create({
         data: {
           players: {
@@ -17,17 +17,26 @@ export class LobyRepository {
   }
 
   async findById(lobyId: string) {
-    return await prismaClient.loby
+    return await prismaClient.lobby
       .findFirst({
         where: {
           idLoby: lobyId,
+        },
+        include: {
+          players: true,
         },
       })
       .catch((error) => console.error(error))
   }
 
   async list() {
-    return await prismaClient.loby.findMany().catch((error) => console.error(error))
+    return await prismaClient.lobby
+      .findMany({
+        include: {
+          players: true,
+        },
+      })
+      .catch((error) => console.error(error))
   }
 
   async delete(lobyId: string) {
@@ -37,7 +46,7 @@ export class LobyRepository {
       throw console.error("tournament doesn't exist")
     }
 
-    await prismaClient.loby
+    await prismaClient.lobby
       .delete({
         where: {
           idLoby: findLoby.idLoby,
@@ -52,7 +61,7 @@ export class LobyRepository {
     const findLoby = await this.findById(lobyId)
     console.log(' imput', userId)
 
-    return await prismaClient.loby
+    return await prismaClient.lobby
       .update({
         where: {
           idLoby: findLoby?.idLoby,

@@ -1,16 +1,18 @@
-import { TournamentDto } from '../../business/dto/tournament/tournamentDto'
+import { TournamentDto, TournamentType } from '../../business/dto/tournament/tournamentDto'
 import prismaClient from '../prisma'
 
 export class TournamentRepository {
   async create(input: TournamentDto) {
-    const { date, locale, name, type } = input
+    const { date, locale, name, ownerId } = input
     return prismaClient.tournaments
       .create({
         data: {
           date,
           name,
           locale,
-          type,
+          type: TournamentType.DUEL,
+          isTournamentActive: false,
+          roundNumber: 0,
           matches: {
             create: [],
           },
@@ -20,6 +22,7 @@ export class TournamentRepository {
           ranking: {
             create: [],
           },
+          ownerId,
         },
       })
       .catch((error) => console.error(error))
@@ -57,9 +60,9 @@ export class TournamentRepository {
     return { ok: true }
   }
 
-  async updatePlayers(userId: string, input: Partial<TournamentDto>) {
-    const findTournament = await this.findById(userId)
-    const { date, locale, name, type } = input
+  async updatePlayers(tournamentId: string, input: Partial<TournamentDto>) {
+    const findTournament = await this.findById(tournamentId)
+    const { date, locale, name, type, ownerId } = input
 
     return await prismaClient.tournaments
       .update({
@@ -72,8 +75,9 @@ export class TournamentRepository {
           name,
           type,
           players: {
-            connect: [{ idUser: '6602c82fb233971e338d5afe' }],
+            connect: [{ idUser: tournamentId }],
           },
+          ownerId,
         },
         include: {
           players: true,

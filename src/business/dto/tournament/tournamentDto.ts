@@ -4,7 +4,10 @@ export interface TournamentDto {
   name: string
   date: string
   locale: string
-  type: string
+  type?: TournamentType
+  roundNumber: number
+  isTournamentActive: Boolean
+  ownerId: string
   ranking?: Ranking[]
   players?: UserDto[]
   matches?: Matches[]
@@ -30,4 +33,9 @@ interface Matches {
 export interface lobyDto {
   players: UserDto
   tournamentsId: string
+}
+
+export enum TournamentType {
+  DUEL = 'duel',
+  MULTIPLAYER = 'multiPlayer',
 }

@@ -14,86 +14,102 @@ datasource db {
 }
 
 model Users {
-  idUser         String       @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  nikname        String?
-  email          String
-  password       String
-  role           Role         @default(player)
-  isInTournament Boolean?     @default(false)
-  dateBirth      String
-  created_at     DateTime?    @default(now())
-  updated_at     DateTime?    @default(now())
-  Matchs         Matchs?
-  Ranking        Ranking?
-  Tournaments    Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
-  tournamentsId  String?      @unique @db.ObjectId
-  Loby           Loby?        @relation(fields: [lobyIdLoby], references: [idLoby])
-  lobyIdLoby     String?      @unique @db.ObjectId
+  idUser           String       @id @default(auto()) @map("_id") @db.ObjectId
+  name             String
+  nikname          String?
+  email            String
+  password         String
+  role             Role         @default(player)
+  isInTournament   Boolean?     @default(false)
+  dateBirth        String
+  tournament       Tournaments? @relation("players", fields: [tournamentId], references: [idTournament], onDelete: NoAction, onUpdate: NoAction)
+  tournamentId     String?      @unique @db.ObjectId
+  playerOne        Matchs?      @relation(name: "playerOne")
+  playerTwo        Matchs?      @relation(name: "playerTwo")
+  playersRanking   Ranking?     @relation("playersRanking", fields: [playersRankingId], references: [idRanking], onDelete: NoAction, onUpdate: NoAction)
+  playersRankingId String?      @unique @db.ObjectId
+  owner            Tournaments? @relation(name: "owner")
+  ownerId          String?      @unique @db.ObjectId
+  winner           Matchs?      @relation(fields: [winnerId], references: [idMatch], onDelete: NoAction, onUpdate: NoAction)
+  winnerId         String?      @unique @db.ObjectId
+  lobby            Lobby?       @relation(fields: [lobbyId], references: [idLoby], onDelete: NoAction, onUpdate: NoAction)
+  lobbyId          String?      @unique @db.ObjectId
+  created_at       DateTime?    @default(now())
+  updated_at       DateTime?    @default(now())
 
   @@map("user")
 }
 
 model Tournaments {
-  idTournament String    @id @default(auto()) @map("_id") @db.ObjectId
-  name         String
-  date         String
-  locale       String
-  type         String
-  ranking      Ranking[]
-  players      Users[]
-  matches      Matchs[]
-  created_at   DateTime? @default(now())
-  updated_at   DateTime? @default(now())
-  playersId    String?   @unique @db.ObjectId
-  usersId      String?   @unique @db.ObjectId
-  Loby         Loby?
+  idTournament       String         @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  date               String
+  locale             String
+  type               TournamentType @default(duel)
+  ranking            Ranking[]      @relation(name: "ranking")
+  players            Users[]        @relation(name: "players")
+  owner              Users          @relation("owner", fields: [ownerId], references: [idUser])
+  ownerId            String         @unique @db.ObjectId
+  matches            Matchs[]       @relation(name: "matches")
+  roundNumber        Int            @default(0)
+  isTournamentActive Boolean        @default(false)
+  lobby              Lobby?         @relation(name: "lobby")
+  tournamentsId      String?        @unique @db.ObjectId
+  created_at         DateTime?      @default(now())
+  updated_at         DateTime?      @default(now())
 
   @@map("tournament")
 }
 
 model Matchs {
-  idMatch       String       @id @default(auto()) @map("_id") @db.ObjectId
-  player        Json
-  oponent       Json
-  date          String
-  winnerScore   Int?
-  loserScore    Int?
-  winner        Users?       @relation(fields: [userId], references: [idUser])
-  created_at    DateTime?    @default(now())
-  updated_at    DateTime?    @default(now())
-  Tournaments   Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
-  tournamentsId String?      @unique @db.ObjectId
-  userId        String?      @unique @db.ObjectId
+  idMatch      String      @id @default(auto()) @map("_id") @db.ObjectId
+  player       Users       @relation("playerOne", fields: [playerOneId], references: [idUser])
+  playerOneId  String      @unique @db.ObjectId
+  oponent      Users       @relation("playerTwo", fields: [playerTwoId], references: [idUser])
+  playerTwoId  String      @unique @db.ObjectId
+  date         String
+  winnerScore  Int?
+  loserScore   Int?
+  winner       Users?
+  tournament   Tournaments @relation("matches", fields: [tournamentId], references: [idTournament])
+  tournamentId String      @unique @db.ObjectId
+  created_at   DateTime?   @default(now())
+  updated_at   DateTime?   @default(now())
 
   @@map("match")
 }
 
 model Ranking {
-  idRanking     String       @id @default(auto()) @map("_id") @db.ObjectId
-  name          Users?       @relation(fields: [userId], references: [idUser])
-  victories     Int?
-  defeats       Int?
-  draws         Int?
-  Tournaments   Tournaments? @relation(fields: [tournamentsId], references: [idTournament])
-  created_at    DateTime?    @default(now())
-  updated_at    DateTime?    @default(now())
-  tournamentsId String?      @unique @db.ObjectId
-  userId        String?      @unique @db.ObjectId
+  idRanking    String      @id @default(auto()) @map("_id") @db.ObjectId
+  players      Users[]     @relation(name: "playersRanking")
+  victories    Int?
+  defeats      Int?
+  draws        Int?
+  tournament   Tournaments @relation("ranking", fields: [tournamentId], references: [idTournament])
+  tournamentId String      @unique @db.ObjectId
+  created_at   DateTime?   @default(now())
+  updated_at   DateTime?   @default(now())
 
   @@map("ranking")
 }
 
-model Loby {
+model Lobby {
   idLoby        String      @id @default(auto()) @map("_id") @db.ObjectId
   players       Users[]
-  tournament    Tournaments @relation(fields: [tournamentsId], references: [idTournament])
+  tournament    Tournaments @relation("lobby", fields: [tournamentsId], references: [idTournament])
+  tournamentsId String      @unique @db.ObjectId
   created_at    DateTime?   @default(now())
   updated_at    DateTime?   @default(now())
-  tournamentsId String      @unique @db.ObjectId
+
+  @@map("lobby")
 }
 
 enum Role {
   player
   shopkeeper
+}
+
+enum TournamentType {
+  duel
+  multiPlayer
 }
